@@ -33,7 +33,7 @@ sl38:"Car detailing website — from 11 000 ₽", sl39:"Medical centre website �
     fsv:"Services", ftH:"Tell us about your project <span>—&nbsp;estimate and timeline on day one</span>", ftTg:"Message us on Telegram", ftAb:"Websites, Telegram bots and presentations, end to end. Based in Kazan, working remotely worldwide.", ftSt:"Studio", ftFaq:"FAQ", ftCt:"Contact", ftPr:"We are on Profi.ru", fpol:"Privacy", fsog:"Consent",
     ctc0:"Not a fan of forms —",
     "ey-p":"Pricing", "pr-h":"Prices known<br>before we talk",
-    "pr-l":"No \u201cwe\u2019ll quote it individually\u201d. Three ready packages cover nine tasks out of ten \u2014 amounts and timelines below.",
+    "pr-calc":"Got your own task? <a href=\"/kalkulyator-stoimosti-sayta.html\" style=\"color:#fff;text-decoration:underline;text-underline-offset:3px\">Estimate it in the calculator</a> \u2014 site type, pages and features, total instantly.","pr-l":"No \u201cwe\u2019ll quote it individually\u201d. Three ready packages cover nine tasks out of ten \u2014 amounts and timelines below.",
     "pr-l2":"Need something separate — the full 54-service list is below. Starting prices; the exact number comes after a short brief.",
     "cm-h":"What people compare us to",
     cm1b:"Site builder", cm1p:"from 20,000 ₽",
