@@ -72,6 +72,7 @@ export function toSiteReview(node, who) {
     `n:${js(shortName(node.author))}`, `w:${js(w)}`, `we:${js(en)}`, `p:${js(price(pv))}`,
     `d:${js(`${day} ${MONTHS_RU[m]} ${y}`)}`, `de:${js(`${day} ${MONTHS_EN[m]} ${y}`)}`, 'r:5',
   ];
+  if (String(node.mark).trim() === '5+') parts.push('m:"5+"'); // на Профи высшая оценка — «5+»
   if (who === 's') parts.push('s:"s"');
   parts.push(`t:${js(t)}`, `te:${js(t)}`);
   return { line: '{' + parts.join(', ') + '},', d: `${day} ${MONTHS_RU[m]} ${y}`, n: shortName(node.author), author: node.author, t };
