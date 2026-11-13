@@ -22,7 +22,7 @@ concurrency:
 
 jobs:
   sync:
-    # 13.11 ubuntu-latest стал 26.04, Playwright 1.56 её не поддерживает — закреплено на 24.04
+    # С 9.11 ubuntu-latest — это 26.04, Playwright 1.56 её не поддерживает — закреплено на 24.04
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
