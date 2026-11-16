@@ -87,15 +87,19 @@ export function pickNew(edges, who, seen, existing) {
     if (parseInt(n.mark, 10) < MIN_MARK) continue;
     if (!cleanText(n.textHTML)) continue;
     const r = toSiteReview(n, who);
+    const sameWho = (x) => ((x.s || 'y') === who) && (x.n === r.n || r.author.includes(x.n) || x.n.includes(r.n));
     // Защита от дублей с отзывами, которые были добавлены вручную до автопереноса.
-    const dup = existing.some((x) => x.d === r.d && ((x.s || 'y') === who) &&
-      (x.n === r.n || r.author.includes(x.n) || x.n.includes(r.n)));
-    out.push({ id: String(n.id), dup, ...r });
+    const dup = existing.some((x) => x.d === r.d && sameWho(x));
+    // Клиент дописал отзыв: у Профи это новый номер и новая дата, старый исчезает. Раньше скрипт добавлял его
+    // вторым (16.11: Ольга, «Веб-дизайн» 2 и 10 ноября — на сайте на 1 больше, чем на Профи). Теперь заменяем старый.
+    const head = (t) => String(t || '').replace(/\s+/g, ' ').trim().slice(0, 60);
+    const edited = dup ? null : existing.find((x) => sameWho(x) && x.t && head(r.t).startsWith(head(x.t)));
+    out.push({ id: String(n.id), dup, replaces: edited ? { n: edited.n, d: edited.d } : null, ...r });
   }
   return out;
 }
 
-function readReviews(html) {
+export function readReviews(html) {
   const i = html.indexOf('var REVIEWS = [');
   if (i < 0) throw new Error('REVIEWS not found');
   let depth = 0, j = html.indexOf('[', i);
@@ -106,7 +110,15 @@ function readReviews(html) {
   throw new Error('REVIEWS not closed');
 }
 
-function updateCounts(total) {
+// Убрать строку отзыва {n:"Имя", … d:"дата", …} из REVIEWS (одна строка — один отзыв)
+export function dropReview(html, n, d) {
+  const lines = html.split('\n');
+  const i = lines.findIndex((l) => l.startsWith(`{n:${JSON.stringify(n)},`) && l.includes(`d:${JSON.stringify(d)}`));
+  if (i >= 0) lines.splice(i, 1);
+  return lines.join('\n');
+}
+
+export function updateCounts(total) {
   const ru = `${total} ${plural(total, 'отзыв', 'отзыва', 'отзывов')}`;
   const ruGen = `${total} ${plural(total, 'отзыв', 'отзыва', 'отзывов')}`;
   const en = `${total} review${total === 1 ? '' : 's'}`;
@@ -140,7 +152,7 @@ function serve() {
 }
 
 // Тот же пререндер, что раньше делался вручную: JS-блоки главной сохраняются в HTML между маркерами <!--pr:id-->.
-async function prerender(browser) {
+export async function prerender(browser) {
   const IDS = ['filters', 'worksGrid', 'wMore', 'ptable', 'revWho', 'revGrid', 'revMore'];
   const srv = await serve();
   const port = srv.address().port;
@@ -212,7 +224,7 @@ async function main() {
     for (const r of pickNew(data.edges, p.who, seen, existing)) {
       seen.add(r.id);
       if (r.dup) console.log(`уже на сайте: ${r.n}, ${r.d}`);
-      else { add.push(r); console.log(`новый отзыв: ${r.n}, ${r.d} — ${r.t.slice(0, 60)}…`); }
+      else { add.push(r); console.log(`${r.replaces ? `отзыв дописан (было ${r.replaces.d}, заменяю)` : 'новый отзыв'}: ${r.n}, ${r.d} — ${r.t.slice(0, 60)}…`); }
     }
   }
 
@@ -226,8 +238,9 @@ async function main() {
     for (const f of ['index.html', '404.html']) {
       const p = path.join(ROOT, f);
       if (!fs.existsSync(p)) continue;
-      const t = fs.readFileSync(p, 'utf8');
+      let t = fs.readFileSync(p, 'utf8');
       if (!t.includes('var REVIEWS = [\n')) continue;
+      for (const r of add.filter((x) => x.replaces)) t = dropReview(t, r.replaces.n, r.replaces.d);
       fs.writeFileSync(p, t.replace('var REVIEWS = [\n', 'var REVIEWS = [\n' + block));
     }
     const total = readReviews(fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8')).length;
