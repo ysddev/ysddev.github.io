@@ -1022,49 +1022,56 @@ var c = document.createElement("canvas"); c.className = "sky";
 var x = c.getContext && c.getContext("2d"); if (!x) return;
 field.insertBefore(c, field.firstChild);
 var red = matchMedia("(prefers-reduced-motion:reduce)").matches;
-var W, H, D = Math.min(window.devicePixelRatio || 1, 1.5), S = [], M = [], run = true, last = 0, next = 1800, my = scrollY, fc = 0;
+/* Всё движение считается по времени, а не по кадрам: одинаково плавно на 60 и 120 Гц и при просадках.
+Звёзды заданы в долях экрана — когда на телефоне прячется адресная строка, они не перемешиваются. */
+var W = 0, H = 0, lastW = -1, N = 0, D = Math.min(window.devicePixelRatio || 1, 2), S = [], M = [],
+run = true, prev = 0, last = 0, next = 2200, sy = scrollY;
+for (var i = 0; i < 260; i++) S.push({u: Math.random(), v: Math.random(), r: Math.random() * 1.05 + .25,
+a: Math.random() * .6 + .25, t: Math.random() * 6.283, w: (Math.random() * .9 + .2) / 1000, p: Math.random() * .7 + .15});
 function size(){
-W = innerWidth; H = innerHeight; c.width = W * D; c.height = H * D; x.setTransform(D, 0, 0, D, 0, 0);
-var n = Math.min(240, Math.round(W * H / 7500)); S = [];
-for (var i = 0; i < n; i++) S.push({x: Math.random() * W, y: Math.random() * H, r: Math.random() * 1.05 + .25,
-a: Math.random() * .6 + .25, t: Math.random() * 6.28, s: Math.random() * .02 + .004, p: Math.random() * .7 + .15});
-if (red) paint(0);
+W = innerWidth; H = innerHeight; c.width = Math.round(W * D); c.height = Math.round(H * D); x.setTransform(D, 0, 0, D, 0, 0);
+if (W !== lastW){ lastW = W; N = Math.min(S.length, Math.round(W * H / 7500)); }
+if (red){ sy = scrollY; paint(0); }
 }
-function shoot(){
-var left = Math.random() < .5, sx = left ? Math.random() * W * .55 : W * .45 + Math.random() * W * .55,
-sy = Math.random() * H * .32, ang = (left ? .42 : Math.PI - .42) + (Math.random() - .5) * .3, v = W > 720 ? 14 : 9;
-M.push({x: sx, y: sy, vx: Math.cos(ang) * v, vy: Math.sin(ang) * v, l: 0, L: 55 + Math.random() * 30});
+function shoot(t){
+var left = Math.random() < .5, ang = (left ? .42 : Math.PI - .42) + (Math.random() - .5) * .3, v = W > 720 ? .62 : .45;
+M.push({x: left ? Math.random() * W * .55 : W * .45 + Math.random() * W * .55, y: Math.random() * H * .32,
+dx: Math.cos(ang), dy: Math.sin(ang), d: v * 900, L: 1000 + Math.random() * 500, t0: t, tail: W > 720 ? 150 : 100});
 }
+function ease(p){ return 1 - Math.pow(1 - p, 2.2); }             /* метеор плавно тормозит к концу */
+function env(p){ return p < .18 ? p / .18 : 1 - (p - .18) / .82; }   /* появляется и гаснет без вспышки */
 function paint(t){
 x.clearRect(0, 0, W, H); x.fillStyle = "#fff";
-for (var i = 0; i < S.length; i++){
-var s = S[i]; if (!red) s.t += s.s;
-var yy = ((s.y - my * s.p * .12) % H + H) % H;
-x.globalAlpha = s.a * (.55 + .45 * Math.sin(s.t)); x.beginPath(); x.arc(s.x, yy, s.r, 0, 6.283); x.fill();
+for (var i = 0; i < N; i++){
+var s = S[i], yy = ((s.v * H - sy * s.p * .12) % H + H) % H;
+var edge = Math.min(1, yy / 28, (H - yy) / 28);                    /* у края экрана звезда гаснет, а не прыгает */
+x.globalAlpha = s.a * edge * (red ? .8 : .55 + .45 * Math.sin(s.t + t * s.w));
+x.beginPath(); x.arc(s.u * W, yy, s.r, 0, 6.283); x.fill();
 }
 x.globalAlpha = 1;
 if (red) return;
-if (t - last > next){ last = t; next = 3200 + Math.random() * 4800; shoot(); }
+if (t - last > next){ last = t; next = 3200 + Math.random() * 4800; shoot(t); }
 for (var j = M.length - 1; j >= 0; j--){
-var m = M[j]; m.x += m.vx; m.y += m.vy; m.l++;
-var k = 1 - m.l / m.L; if (k <= 0){ M.splice(j, 1); continue; }
-var tx = m.x - m.vx * 10, ty = m.y - m.vy * 10, g = x.createLinearGradient(m.x, m.y, tx, ty);
-g.addColorStop(0, "rgba(255,255,255," + (.9 * k) + ")"); g.addColorStop(1, "rgba(255,255,255,0)");
-x.strokeStyle = g; x.lineWidth = 1.5; x.lineCap = "round"; x.beginPath(); x.moveTo(m.x, m.y); x.lineTo(tx, ty); x.stroke();
-x.fillStyle = "rgba(255,255,255," + k + ")"; x.beginPath(); x.arc(m.x, m.y, 1.5, 0, 6.283); x.fill();
+var m = M[j], p = (t - m.t0) / m.L; if (p >= 1){ M.splice(j, 1); continue; }
+var k = env(p), k2 = k * k * (3 - 2 * k), dist = m.d * ease(p), hx = m.x + m.dx * dist, hy = m.y + m.dy * dist,
+tl = m.tail * (.35 + .65 * k2), tx = hx - m.dx * tl, ty = hy - m.dy * tl, g = x.createLinearGradient(hx, hy, tx, ty);
+g.addColorStop(0, "rgba(255,255,255," + (.85 * k2) + ")"); g.addColorStop(1, "rgba(255,255,255,0)");
+x.strokeStyle = g; x.lineWidth = 1.4; x.lineCap = "round"; x.beginPath(); x.moveTo(hx, hy); x.lineTo(tx, ty); x.stroke();
+x.fillStyle = "rgba(255,255,255," + k2 + ")"; x.beginPath(); x.arc(hx, hy, 1.4, 0, 6.283); x.fill();
 }
 }
 function frame(t){
 if (!run) return;
-fc++; if (W > 720 || fc % 2 === 0) paint(t);   /* на телефоне 30 кадров — бережём батарею */
+var dt = Math.min(t - (prev || t), 64); prev = t;
+sy += (scrollY - sy) * (1 - Math.exp(-dt / 140));                 /* звёзды догоняют прокрутку мягко, с инерцией */
+paint(t);
 requestAnimationFrame(frame);
 }
 size();
-addEventListener("resize", function(){ clearTimeout(size.t); size.t = setTimeout(size, 200); });
-addEventListener("scroll", function(){ my = scrollY; if (red) paint(0); }, {passive: true});
-if (red) return;
+addEventListener("resize", function(){ clearTimeout(size.t); size.t = setTimeout(size, 120); });
+if (red){ addEventListener("scroll", function(){ sy = scrollY; paint(0); }, {passive: true}); return; }
 document.addEventListener("visibilitychange", function(){
-if (document.hidden) run = false; else if (!run){ run = true; requestAnimationFrame(frame); }
+if (document.hidden) run = false; else if (!run){ run = true; prev = 0; requestAnimationFrame(frame); }
 });
 requestAnimationFrame(frame);
 })();
