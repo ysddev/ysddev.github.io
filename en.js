@@ -64,7 +64,7 @@ sl38:"Car detailing website — from 10 000 ₽", sl39:"Medical centre website �
     g2b:"The price does not grow", g2s:"The sum is fixed in writing and does not move while the task does not.",
     g3b:"Everything is in your name", g3s:"Domain, hosting, source files and access — yours from day one.",
     g4b:"Staged payment", g4s:"Part after the mock-up is approved, the rest after handover.",
-    pn1:"off the second product in one order: website + bot or deck<small>offer valid until 31 December 2026</small>", pn2:"scoping and the quote", pn3:"days of revisions after handover — depends on the package", pn3b:"up to 60",
+    pn1:"off your first order — any service<small>applied right in the quote, no promo codes</small>", pn2:"scoping and the quote", pn3:"days of revisions after handover — depends on the package", pn3b:"up to 60",
     status:"Taking new projects",
     h1a:"Websites, landing pages, online stores, Telegram bots, Mini Apps, AI assistants, CRM, decks and design", h1b:"end to end.",
     sub:"You get a fixed quote and a firm deadline on day one, progress every day, and 14 days of free revisions.",
