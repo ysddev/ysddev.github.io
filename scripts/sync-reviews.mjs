@@ -4,6 +4,7 @@
 // 2. Берёт только письменные отзывы с оценкой 4 и выше, которых ещё нет на сайте.
 // 3. Добавляет их в начало REVIEWS в index.html и 404.html, обновляет счётчики «N отзывов»
 //    во всех местах и заново пререндерит блок отзывов.
+// 4. Счёт на кнопках и «N отзывов» — как на Профи (PROFI_TOTAL), даже если новый отзыв без текста.
 //
 // Запуск: node scripts/sync-reviews.mjs [--dry]
 // Переменная PROFI_JSON=<файл> позволяет подать заранее сохранённые данные вместо похода на Профи (для проверки).
@@ -108,6 +109,12 @@ export function readReviews(html) {
     else if (html[k] === ']' && --depth === 0) return (0, eval)(html.slice(j, k + 1));
   }
   throw new Error('REVIEWS not closed');
+}
+
+// Счёт отзывов на Профи из index.html: var PROFI_TOTAL = {s: 25, y: 35};
+export function readTotals(html) {
+  const m = html.match(/var PROFI_TOTAL = \{\s*s:\s*(\d+),\s*y:\s*(\d+)\s*\};/);
+  return m ? { s: +m[1], y: +m[2] } : {};
 }
 
 // Убрать строку отзыва {n:"Имя", … d:"дата", …} из REVIEWS (одна строка — один отзыв)
@@ -229,8 +236,23 @@ async function main() {
   }
 
   const seenChanged = seen.size !== new Set(seenData.seen.map(String)).size;
-  if (!add.length && !seenChanged) { console.log('Новых отзывов нет.'); await browser.close(); return; }
-  if (DRY) { console.log(`[dry] добавил бы ${add.length}`); await browser.close(); return; }
+  // 23.11: счёт на кнопках «Софья / Юсуф» и «N отзывов» — как на Профи (там есть и отзывы без текста, на сайт они не
+  // попадают). Было: считали только перенесённые — у Софьи на Профи 25, на сайте 24, а «новых отзывов нет»
+  const totals = readTotals(indexHtml);
+  const fresh = { ...totals };
+  for (const p of PROFILES) if (profiles[p.id]?.total) fresh[p.who] = Math.max(profiles[p.id].total, 0);
+  const totalsChanged = PROFILES.some((p) => (fresh[p.who] || 0) !== (totals[p.who] || 0));
+  if (!add.length && !seenChanged && !totalsChanged) { console.log('Новых отзывов нет, счёт как на Профи.'); await browser.close(); return; }
+  if (DRY) { console.log(`[dry] добавил бы ${add.length}, счёт ${JSON.stringify(fresh)}`); await browser.close(); return; }
+  if (totalsChanged) {
+    for (const f of ['index.html', '404.html']) {
+      const p = path.join(ROOT, f);
+      if (!fs.existsSync(p)) continue;
+      const t = fs.readFileSync(p, 'utf8');
+      fs.writeFileSync(p, t.replace(/var PROFI_TOTAL = \{[^}]*\};/, `var PROFI_TOTAL = {s: ${fresh.s || 0}, y: ${fresh.y || 0}};`));
+    }
+    console.log(`Счёт как на Профи: Софья ${fresh.s}, Юсуф ${fresh.y}`);
+  }
 
   if (add.length) {
     // Новые сверху: Профи отдаёт отзывы от новых к старым.
@@ -243,10 +265,16 @@ async function main() {
       for (const r of add.filter((x) => x.replaces)) t = dropReview(t, r.replaces.n, r.replaces.d);
       fs.writeFileSync(p, t.replace('var REVIEWS = [\n', 'var REVIEWS = [\n' + block));
     }
-    const total = readReviews(fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8')).length;
+    console.log(`Добавлено: ${add.length}`);
+  }
+  if (add.length || totalsChanged) {
+    const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+    const t = readTotals(html), onSite = readReviews(html);
+    const per = (k) => Math.max(t[k] || 0, onSite.filter((r) => (r.s || 'y') === k).length);
+    const total = per('s') + per('y');
     updateCounts(total);
     await prerender(browser);
-    console.log(`Добавлено: ${add.length}, всего на сайте: ${total}`);
+    console.log(`Всего отзывов (как на Профи): ${total}`);
   }
   fs.mkdirSync(path.dirname(SEEN_FILE), { recursive: true });
   fs.writeFileSync(SEEN_FILE, JSON.stringify({ seen: [...seen].sort() }, null, 1) + '\n');
