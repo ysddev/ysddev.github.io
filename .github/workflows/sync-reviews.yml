@@ -27,6 +27,8 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # даты правок страниц для sitemap.xml
 
       - uses: actions/setup-node@v4
         with:
@@ -40,12 +42,15 @@ jobs:
       - name: Перенос отзывов
         run: node scripts/sync-reviews.mjs ${{ github.ref != 'refs/heads/main' && '--dry' || '' }}
 
+      - name: Даты правок в sitemap.xml
+        run: node scripts/sitemap-lastmod.mjs
+
       - name: Коммит
         if: github.ref == 'refs/heads/main'
         run: |
-          git add -A index.html 404.html en.js widget.js data/profi-reviews.json
+          git add -A index.html 404.html en.js widget.js data/profi-reviews.json sitemap.xml
           if git diff --cached --quiet; then echo "Изменений нет"; exit 0; fi
           git config user.name "github-actions[bot]"
           git config user.email "41898403+github-actions[bot]@users.noreply.github.com"
-          git commit -m "Отзывы: новые с Профи.ру"
+          git commit -m "Отзывы с Профи.ру и даты страниц в sitemap"
           git push
