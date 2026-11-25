@@ -76,7 +76,7 @@ export function toSiteReview(node, who) {
   if (String(node.mark).trim() === '5+') parts.push('m:"5+"'); // на Профи высшая оценка — «5+»
   if (who === 's') parts.push('s:"s"');
   parts.push(`t:${js(t)}`, `te:${js(t)}`);
-  return { line: '{' + parts.join(', ') + '},', d: `${day} ${MONTHS_RU[m]} ${y}`, n: shortName(node.author), author: node.author, t };
+  return { line: '{' + parts.join(', ') + '},', d: `${day} ${MONTHS_RU[m]} ${y}`, n: shortName(node.author), author: node.author || '', t };
 }
 
 export function pickNew(edges, who, seen, existing) {
@@ -90,7 +90,11 @@ export function pickNew(edges, who, seen, existing) {
     const r = toSiteReview(n, who);
     const sameWho = (x) => ((x.s || 'y') === who) && (x.n === r.n || r.author.includes(x.n) || x.n.includes(r.n));
     // Защита от дублей с отзывами, которые были добавлены вручную до автопереноса.
-    const dup = existing.some((x) => x.d === r.d && sameWho(x));
+    // 25.11: теперь читаем все отзывы, а не 10 последних. Имя на Профи клиент мог поменять («Его Величество» вместо
+    // «Александр», аноним вместо «Константин») — такой отзыв тоже уже на сайте: тот же исполнитель, дата и начало текста.
+    const sameText = (x) => (x.s || 'y') === who && (() => { const a = normT(x.t), b = normT(r.t), L = Math.min(a.length, b.length);
+      return L >= 12 && a.slice(0, L) === b.slice(0, L); })();
+    const dup = existing.some((x) => x.d === r.d && (sameWho(x) || sameText(x)));
     // Клиент дописал отзыв: у Профи это новый номер и новая дата, старый исчезает. Раньше скрипт добавлял его
     // вторым (16.11: Ольга, «Веб-дизайн» 2 и 10 ноября — на сайте на 1 больше, чем на Профи). Теперь заменяем старый.
     const head = (t) => String(t || '').replace(/\s+/g, ' ').trim().slice(0, 60);
