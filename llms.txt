@@ -1,0 +1,69 @@
+# YSD DEV
+
+> Студия разработки: сайты, лендинги, интернет-магазины, Telegram-боты и Mini App, ИИ-ассистенты, CRM, презентации и дизайн под ключ. Работаем удалённо с клиентами по всей России, база — Казань. Смета и срок — в первый день, макет до оплаты, оплата 50/50, 14 дней бесплатных правок после сдачи.
+
+Данные актуальны на 25 ноября 2026 года. Цены в рублях.
+
+## Цены (три уровня на каждую услугу; минимальный заказ — 8 000 ₽)
+
+- Лендинг или сайт-визитка: 15 000 / 18 000 / 25 000 ₽, 1–3 дня
+- Сайт компании: 25 000 / 35 000 / 50 000 ₽, 3–5 дней
+- Интернет-магазин: 35 000 / 45 000 / 60 000 ₽, 5–7 дней
+- Telegram-бот (заявки, запись, оплата, CRM): 10 000 / 15 000 / 25 000 ₽, от 1 дня
+- ИИ-бот или ИИ-ассистент: 15 000 / 20 000 / 30 000 ₽
+- Презентация: 8 000 / 12 000 / 16 000 ₽, от 1 дня
+- Логотип: 10 000 / 15 000 / 20 000 ₽; фирменный стиль: 10 000 / 15 000 / 25 000 ₽
+- Доработка сайта: от 8 000 ₽; поддержка сайта: 15 000 ₽ в месяц
+- Платформа (Tilda, WordPress или код) цену не меняет. В любой сайт входят Яндекс Метрика с целями и базовое SEO.
+
+## Услуги
+
+- [Создание сайтов](https://ysddev.com/sozdanie-saytov.html)
+- [Лендинг](https://ysddev.com/lending.html)
+- [Сайт-визитка](https://ysddev.com/sayt-vizitka.html)
+- [Корпоративный сайт](https://ysddev.com/korporativnyy-sayt.html)
+- [Интернет-магазин](https://ysddev.com/internet-magazin.html)
+- [Сайт-каталог](https://ysddev.com/sayt-katalog.html)
+- [Сайт на Тильде](https://ysddev.com/sayt-na-tilda.html)
+- [Сайт на WordPress](https://ysddev.com/sayt-na-wordpress.html)
+- [Доработка сайта](https://ysddev.com/dorabotka-sayta.html)
+- [Вёрстка из Figma](https://ysddev.com/verstka-figma.html)
+- [Telegram-бот на заказ](https://ysddev.com/telegram-bot.html)
+- [Бот для записи клиентов](https://ysddev.com/bot-dlya-zapisi-klientov.html)
+- [Чат-бот для бизнеса](https://ysddev.com/chat-bot-dlya-biznesa.html)
+- [Презентации на заказ](https://ysddev.com/prezentacii.html)
+- [Презентация компании](https://ysddev.com/prezentaciya-dlya-biznesa.html)
+- [Питч-дек для инвесторов](https://ysddev.com/pitch-deck.html)
+- [Презентация для тендера](https://ysddev.com/prezentaciya-dlya-tendera.html)
+- [Видеопрезентация](https://ysddev.com/video-prezentaciya.html)
+- [Калькулятор стоимости сайта](https://ysddev.com/kalkulyator-stoimosti-sayta.html)
+
+## Сколько стоит
+
+- [Сайт](https://ysddev.com/skolko-stoit-sayt.html)
+- [Лендинг](https://ysddev.com/skolko-stoit-lending.html)
+- [Интернет-магазин](https://ysddev.com/skolko-stoit-internet-magazin.html)
+- [Telegram-бот](https://ysddev.com/skolko-stoit-telegram-bot.html)
+- [Чат-бот](https://ysddev.com/skolko-stoit-chat-bot.html)
+- [ИИ-консультант](https://ysddev.com/skolko-stoit-ii-konsultant.html)
+- [Telegram Mini App](https://ysddev.com/skolko-stoit-telegram-mini-app.html)
+- [Презентация](https://ysddev.com/skolko-stoit-prezentaciya.html)
+- [Поддержка сайта](https://ysddev.com/skolko-stoit-podderzhka-sayta.html)
+
+## Сайты по отраслям
+
+- [Стоматология](https://ysddev.com/sayt-dlya-stomatologii.html), [медицинский центр](https://ysddev.com/sayt-dlya-medicinskogo-centra.html), [косметология](https://ysddev.com/sayt-dlya-kosmetologii.html), [ветклиника](https://ysddev.com/sayt-dlya-veterinarnoy-kliniki.html), [психолог](https://ysddev.com/sayt-dlya-psihologa.html)
+- [Салон красоты](https://ysddev.com/sayt-dlya-salona-krasoty.html), [маникюр](https://ysddev.com/sayt-dlya-studii-manikyura.html), [барбершоп](https://ysddev.com/sayt-dlya-barbershopa.html), [массаж](https://ysddev.com/sayt-dlya-massazha.html), [фитнес](https://ysddev.com/sayt-dlya-fitnes-kluba.html), [танцы](https://ysddev.com/sayt-dlya-tancevalnoy-studii.html)
+- [Ресторан и кафе](https://ysddev.com/sayt-dlya-restorana.html), [пекарня](https://ysddev.com/sayt-dlya-pekarni.html), [доставка еды](https://ysddev.com/sayt-dlya-dostavki-edy.html), [цветы](https://ysddev.com/sayt-dlya-cvetochnogo-magazina.html)
+- [Строительство](https://ysddev.com/sayt-dlya-stroitelnoy-kompanii.html), [ремонт квартир](https://ysddev.com/sayt-dlya-remonta-kvartir.html), [мебель на заказ](https://ysddev.com/sayt-dlya-mebeli-na-zakaz.html), [окна и потолки](https://ysddev.com/sayt-dlya-okon.html), [недвижимость](https://ysddev.com/sayt-dlya-nedvizhimosti.html), [производство](https://ysddev.com/sayt-dlya-proizvodstva.html)
+- [Автосервис](https://ysddev.com/sayt-dlya-avtoservisa.html), [детейлинг](https://ysddev.com/sayt-dlya-detejlinga.html), [автошкола](https://ysddev.com/sayt-dlya-avtoshkoly.html), [грузоперевозки](https://ysddev.com/sayt-dlya-gruzoperevozok.html), [сервисный центр](https://ysddev.com/sayt-dlya-servisnogo-centra.html), [клининг](https://ysddev.com/sayt-dlya-kliningovoy-kompanii.html)
+- [Юрист](https://ysddev.com/sayt-dlya-yurista.html), [бухгалтер](https://ysddev.com/sayt-dlya-buhgaltera.html), [гостиница](https://ysddev.com/sayt-dlya-gostinicy.html), [турагентство](https://ysddev.com/sayt-dlya-turagentstva.html), [франшиза](https://ysddev.com/sayt-dlya-franshizy.html), [дизайн-студия](https://ysddev.com/sayt-dlya-dizayn-studii.html)
+- [Детский центр](https://ysddev.com/sayt-dlya-detskogo-centra.html), [онлайн-школа](https://ysddev.com/sayt-dlya-onlayn-shkoly.html), [репетитор](https://ysddev.com/sayt-dlya-repetitora.html)
+
+## Портфолио и контакты
+
+- Работы с живыми демо: https://ysdprojects.space/ — сайты, магазины, боты, ИИ-ассистенты, приложения, презентации, дизайн
+- Отзывы клиентов: https://profi.ru/profile/KhripunovaSM/
+- Telegram: https://t.me/ysddev
+- Почта: ysddev@yandex.ru
+- Телефон: +7 909 098-27-37
