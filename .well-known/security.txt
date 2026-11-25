@@ -1,4 +1,4 @@
-Contact: mailto:ysddev@yandex.ru
+Contact: mailto:hello@ysddev.com
 Contact: https://t.me/ysddev
 Expires: 2027-09-30T00:00:00.000Z
 Preferred-Languages: ru, en

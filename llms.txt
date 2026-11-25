@@ -65,5 +65,5 @@
 - Работы с живыми демо: https://ysdprojects.space/ — сайты, магазины, боты, ИИ-ассистенты, приложения, презентации, дизайн
 - Отзывы клиентов: https://profi.ru/profile/KhripunovaSM/
 - Telegram: https://t.me/ysddev
-- Почта: ysddev@yandex.ru
+- Почта: hello@ysddev.com
 - Телефон: +7 909 098-27-37
