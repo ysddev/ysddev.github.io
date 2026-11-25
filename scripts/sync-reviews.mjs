@@ -125,6 +125,47 @@ export function dropReview(html, n, d) {
   return lines.join('\n');
 }
 
+// 25.11 владелец: «Отзыв на 5+ поменяли, а на сайте до сих пор 5; у Никиты стоит 1, хотя на Профи 5+».
+// Скрипт переносил только новые отзывы, а оценку уже перенесённых не трогал: клиент поднял 5 до 5+ — на сайте осталось 5.
+// У 13 отзывов, перенесённых вручную, стояло m:1 — на сайте рядом со звёздами было «1». Теперь оценка каждого отзыва
+// сверяется с Профи при каждом запуске: 5+ → m:"5+", 5 → без m, 4 → r:4.
+const normT = (t) => String(t || '').toLowerCase().replace(/ё/g, 'е').replace(/[^a-zа-я0-9]+/g, '').slice(0, 24);
+
+export function markField(mark) {
+  const m = String(mark).trim();
+  if (m === '5+') return 'r:5, m:"5+"';
+  const n = parseInt(m, 10);
+  return `r:${Number.isFinite(n) ? Math.min(5, Math.max(1, n)) : 5}`;
+}
+
+// Возвращает [новый html, список правок]. Отзыв на сайте ищем по исполнителю и дате, при нескольких — по имени,
+// потом по началу текста (имя на Профи клиент может поменять).
+export function syncMarks(html, nodes) {
+  const lines = html.split('\n');
+  const changes = [];
+  for (const { node, who } of nodes) {
+    if (!node || node.__typename !== 'WrittenReview' || parseInt(node.mark, 10) < MIN_MARK) continue;
+    const { day, m, y } = mskParts(node.date.timestamp);
+    const d = `${day} ${MONTHS_RU[m]} ${y}`;
+    const idx = lines.map((l, i) => [l, i]).filter(([l]) => l.startsWith('{n:') && l.includes(`d:${js(d)}`)
+      && (who === 's') === l.includes('s:"s"')).map(([, i]) => i);
+    if (!idx.length) continue;
+    const n = shortName(node.author);
+    const t = normT(cleanText(node.textHTML));
+    let i = idx.length === 1 ? idx[0] : idx.find((k) => lines[k].startsWith(`{n:${js(n)},`));
+    const same = (x) => { const L = Math.min(x.length, t.length); return L >= 12 && x.slice(0, L) === t.slice(0, L); };
+    if (i === undefined) i = idx.find((k) => { const mt = lines[k].match(/ t:("(?:[^"\\]|\\.)*")/); return mt && same(normT(JSON.parse(mt[1]))); });
+    if (i === undefined) continue;
+    const want = markField(node.mark);
+    const cur = lines[i].match(/r:\d(?:, m:(?:"[^"]*"|\d+))?/);
+    if (cur && cur[0] !== want) {
+      changes.push(`${lines[i].match(/^\{n:("[^"]*")/)[1]} ${d}: ${cur[0]} → ${want}`);
+      lines[i] = lines[i].replace(cur[0], want);
+    }
+  }
+  return [lines.join('\n'), changes];
+}
+
 export function updateCounts(total) {
   const ru = `${total} ${plural(total, 'отзыв', 'отзыва', 'отзывов')}`;
   const ruGen = `${total} ${plural(total, 'отзыв', 'отзыва', 'отзывов')}`;
@@ -196,13 +237,19 @@ async function fetchProfiles(browser) {
   for (const p of PROFILES) {
     const page = await ctx.newPage();
     try {
-      await page.goto(`https://profi.ru/profile/${p.id}/`, { waitUntil: 'domcontentloaded', timeout: 60000 });
+      // 25.11: страница профиля отдаёт только 10 последних отзывов, страница /reviews/ — все: нужно для сверки оценок
+      await page.goto(`https://profi.ru/profile/${p.id}/reviews/`, { waitUntil: 'domcontentloaded', timeout: 60000 });
       const data = await page.evaluate(() => {
         const el = document.getElementById('__NEXT_DATA__');
         if (!el) return null;
         const d = JSON.parse(el.textContent);
-        const pr = d?.props?.pageProps?.dehydratedState?.queries?.[0]?.state?.data?.pages?.[0]?.pxf?.profile;
-        return pr?.reviews ? { total: pr.reviews.totalCount, edges: pr.reviews.edges } : null;
+        let found = null;
+        (function walk(o) {
+          if (found || !o || typeof o !== 'object') return;
+          if (Array.isArray(o.edges) && o.edges[0]?.node && 'mark' in o.edges[0].node) { found = o; return; }
+          for (const k in o) walk(o[k]);
+        })(d);
+        return found ? { total: found.totalCount, edges: found.edges } : null;
       });
       if (!data) console.log(`${p.id}: профиль недоступен (скрыт или сайт не отдал данные) — пропускаю`);
       else { out[p.id] = data; console.log(`${p.id}: на Профи ${data.total} отзывов, на странице ${data.edges.length}`); }
@@ -242,7 +289,18 @@ async function main() {
   const fresh = { ...totals };
   for (const p of PROFILES) if (profiles[p.id]?.total) fresh[p.who] = Math.max(profiles[p.id].total, 0);
   const totalsChanged = PROFILES.some((p) => (fresh[p.who] || 0) !== (totals[p.who] || 0));
-  if (!add.length && !seenChanged && !totalsChanged) { console.log('Новых отзывов нет, счёт как на Профи.'); await browser.close(); return; }
+  // оценки уже перенесённых отзывов — как на Профи сейчас
+  const nodes = PROFILES.flatMap((p) => (profiles[p.id]?.edges || []).map((e) => ({ node: e.node || e, who: p.who })));
+  let marksChanged = false;
+  if (!DRY) {
+    for (const f of ['index.html', '404.html']) {
+      const fp = path.join(ROOT, f);
+      if (!fs.existsSync(fp)) continue;
+      const [t, ch] = syncMarks(fs.readFileSync(fp, 'utf8'), nodes);
+      if (ch.length) { fs.writeFileSync(fp, t); marksChanged = true; if (f === 'index.html') ch.forEach((c) => console.log('оценка: ' + c)); }
+    }
+  } else console.log('[dry] оценки: ' + syncMarks(indexHtml, nodes)[1].join('; '));
+  if (!add.length && !seenChanged && !totalsChanged && !marksChanged) { console.log('Новых отзывов нет, счёт как на Профи.'); await browser.close(); return; }
   if (DRY) { console.log(`[dry] добавил бы ${add.length}, счёт ${JSON.stringify(fresh)}`); await browser.close(); return; }
   if (totalsChanged) {
     for (const f of ['index.html', '404.html']) {
@@ -267,7 +325,7 @@ async function main() {
     }
     console.log(`Добавлено: ${add.length}`);
   }
-  if (add.length || totalsChanged) {
+  if (add.length || totalsChanged || marksChanged) {
     const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
     const t = readTotals(html), onSite = readReviews(html);
     const per = (k) => Math.max(t[k] || 0, onSite.filter((r) => (r.s || 'y') === k).length);
